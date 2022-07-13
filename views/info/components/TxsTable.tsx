@@ -1,7 +1,5 @@
-import {
-    AccountInfoSliceNetworkType,
-    useGetNetworkConfig,
-} from "@elrondnetwork/dapp-core";
+import { useGetNetworkConfig } from "@elrondnetwork/dapp-core/hooks";
+import { AccountInfoSliceNetworkType } from "@elrondnetwork/dapp-core/types";
 import ICArrowLeft from "assets/svg/arrow-left.svg";
 import ICArrowRight from "assets/svg/arrow-right.svg";
 import ICChevronDown from "assets/svg/chevron-down.svg";

@@ -3,20 +3,20 @@ import {
     AddressValue,
     BigUIntValue,
     ContractFunction,
-    GasLimit,
-    TokenIdentifierValue, TypedValue
+    TokenIdentifierValue,
+    TypedValue,
 } from "@elrondnetwork/erdjs/out";
 import { accAddressState, accIsLoggedInState } from "atoms/dappState";
 import {
     farmRecordsState,
     farmSessionIdMapState,
-    FarmToken
+    FarmToken,
 } from "atoms/farmsState";
 import BigNumber from "bignumber.js";
 import { toEGLDD } from "helper/balance";
 import {
     sendTransactions,
-    useCreateTransaction
+    useCreateTransaction,
 } from "helper/transactionMethods";
 import { DappSendTransactionsPropsType } from "interface/dappCore";
 import { IFarm } from "interface/farm";
@@ -31,12 +31,19 @@ const calcUnstakeEntries = (weiAmt: BigNumber, farmTokens: FarmToken[]) => {
                 return { unstakeAmt: new BigNumber(0), farmToken: ft };
             }
             const remain = weiAmt.minus(sum);
-            const lpBalance = ft.balance.div(ft.perLP).integerValue(BigNumber.ROUND_FLOOR);
-            const amt = lpBalance.lte(remain)
-                ? lpBalance
-                : remain;
+            const lpBalance = ft.balance
+                .div(ft.perLP)
+                .integerValue(BigNumber.ROUND_FLOOR);
+            const amt = lpBalance.lte(remain) ? lpBalance : remain;
             sum = sum.plus(amt);
-            return { unstakeAmt: amt.eq(remain) ? amt.multipliedBy(ft.perLP).integerValue(BigNumber.ROUND_FLOOR) : ft.balance, farmToken: ft };
+            return {
+                unstakeAmt: amt.eq(remain)
+                    ? amt
+                          .multipliedBy(ft.perLP)
+                          .integerValue(BigNumber.ROUND_FLOOR)
+                    : ft.balance,
+                farmToken: ft,
+            };
         })
         .filter(({ unstakeAmt }) => unstakeAmt.gt(0));
 };
@@ -58,13 +65,13 @@ const useExitFarm = () => {
                 if (!loggedIn) throw new Error("Connect wallet to exit farm");
                 return await createTransaction(new Address(address), {
                     func: new ContractFunction("ESDTNFTTransfer"),
-                    gasLimit: new GasLimit(8_000_000),
+                    gasLimit: 8_000_000,
                     args: [
-                        new TokenIdentifierValue(Buffer.from(collection)),
+                        new TokenIdentifierValue(collection),
                         new BigUIntValue(nonce),
                         new BigUIntValue(lpAmt),
                         new AddressValue(new Address(farm.farm_address)),
-                        new TokenIdentifierValue(Buffer.from("exitFarm")),
+                        new TokenIdentifierValue("exitFarm"),
                     ],
                 });
             },
@@ -86,11 +93,11 @@ const useExitFarm = () => {
                     (total: TypedValue[], val) => {
                         total = [
                             ...total,
-                            new TokenIdentifierValue(
-                                Buffer.from(val.collection)
-                            ),
+                            new TokenIdentifierValue(val.collection),
                             new BigUIntValue(val.nonce),
-                            new BigUIntValue(val.amount.integerValue(BigNumber.ROUND_FLOOR)),
+                            new BigUIntValue(
+                                val.amount.integerValue(BigNumber.ROUND_FLOOR)
+                            ),
                         ];
                         return total;
                     },
@@ -98,13 +105,13 @@ const useExitFarm = () => {
                 );
                 return await createTransaction(new Address(address), {
                     func: new ContractFunction("MultiESDTNFTTransfer"),
-                    gasLimit: new GasLimit(20_000_000),
+                    gasLimit: 20_000_000,
                     args: [
                         new AddressValue(new Address(farm.farm_address)),
                         new BigUIntValue(new BigNumber(tokens.length)),
 
                         ...farmTokenArgs,
-                        new TokenIdentifierValue(Buffer.from("exitFarm")),
+                        new TokenIdentifierValue("exitFarm"),
                     ],
                 });
             },
@@ -113,7 +120,11 @@ const useExitFarm = () => {
 
     const exitFarm = useRecoilCallback(
         ({ snapshot, set }) =>
-            async (lpAmt: BigNumber, farm: IFarm, unstakeMax: boolean = false) => {
+            async (
+                lpAmt: BigNumber,
+                farm: IFarm,
+                unstakeMax: boolean = false
+            ) => {
                 const loggedIn = await snapshot.getPromise(accIsLoggedInState);
                 const farmRecords = await snapshot.getPromise(farmRecordsState);
 
@@ -126,7 +137,12 @@ const useExitFarm = () => {
                         return { sessionId: "" };
                     const { stakedData } = farmRecord;
                     const farmTokens = stakedData.farmTokens || [];
-                    const entries = unstakeMax ? farmTokens.map(t => ({unstakeAmt: t.balance, farmToken: t})) : calcUnstakeEntries(lpAmt, farmTokens);
+                    const entries = unstakeMax
+                        ? farmTokens.map((t) => ({
+                              unstakeAmt: t.balance,
+                              farmToken: t,
+                          }))
+                        : calcUnstakeEntries(lpAmt, farmTokens);
                     const payload: DappSendTransactionsPropsType = {
                         transactions: await createExitFarmTxMulti(
                             entries.map(

@@ -2,7 +2,6 @@ import {
     Address,
     BigUIntValue,
     ContractFunction,
-    GasLimit,
     TokenIdentifierValue,
     U64Value,
 } from "@elrondnetwork/erdjs/out";
@@ -31,15 +30,11 @@ const useGovLockASH = () => {
                             ),
                             {
                                 func: new ContractFunction("ESDTTransfer"),
-                                gasLimit: new GasLimit(7_000_000),
+                                gasLimit: 7_000_000,
                                 args: [
-                                    new TokenIdentifierValue(
-                                        Buffer.from(ASH_TOKEN.id)
-                                    ),
+                                    new TokenIdentifierValue(ASH_TOKEN.id),
                                     new BigUIntValue(weiAmt),
-                                    new TokenIdentifierValue(
-                                        Buffer.from("create_lock")
-                                    ),
+                                    new TokenIdentifierValue("create_lock"),
                                     new U64Value(unlockTimestamp),
                                 ],
                             }

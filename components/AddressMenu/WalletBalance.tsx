@@ -1,5 +1,5 @@
-import { useGetAccountInfo } from "@elrondnetwork/dapp-core";
 import ImgEgldIcon from "assets/images/egld-icon.png";
+import { accBalanceState } from "atoms/dappState";
 import { walletBalanceState } from "atoms/walletState";
 import BigNumber from "bignumber.js";
 import Avatar from "components/Avatar";
@@ -43,7 +43,7 @@ const TokenBalance = ({ data }: { data: Omit<TokenWithBalance, "id"> }) => {
 };
 function WalletBalance() {
     const balances = useRecoilValue(walletBalanceState);
-    const { account } = useGetAccountInfo();
+    const egldBalance = useRecoilValue(accBalanceState);
     const ashSupportedBalances = useMemo(() => {
         const supportedTokens: TokenWithBalance[] = TOKENS.map((t) => {
             return {
@@ -79,11 +79,11 @@ function WalletBalance() {
                     ? "xEGLD"
                     : "EGLD",
             name: "Elrond eGold",
-            balance: new BigNumber(account.balance),
+            balance: new BigNumber(egldBalance),
             icon: ImgEgldIcon,
             decimals: 18,
         };
-    }, [account]);
+    }, [egldBalance]);
     return (
         <div className="bg-stake-dark-500 py-4">
             <div className="px-6 text-stake-gray-500 text-xs font-bold mb-4">

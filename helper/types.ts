@@ -1,22 +1,21 @@
-import { Nonce } from "@elrondnetwork/erdjs";
 export interface WalletConnectSignatureType {
-  id?: number;
-  jsonrpc?: string;
-  signature: string;
+    id?: number;
+    jsonrpc?: string;
+    signature: string;
 }
 
 export interface RouteType {
-  path: string;
-  component: any;
-  authenticatedRoute?: boolean;
+    path: string;
+    component: any;
+    authenticatedRoute?: boolean;
 }
 
 export type NetworkType = {
-  id: string;
-  egldLabel: string;
-  name: string;
-  walletAddress?: string;
-  apiAddress?: string;
-  gatewayAddress?: string;
-  explorerAddress?: string;
+    id: string;
+    egldLabel: string;
+    name: string;
+    walletAddress?: string;
+    apiAddress?: string;
+    gatewayAddress?: string;
+    explorerAddress?: string;
 };

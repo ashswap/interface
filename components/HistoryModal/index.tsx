@@ -1,10 +1,7 @@
-import {
-    AccountInfoSliceNetworkType,
-    useGetAccountInfo,
-    useGetLoginInfo,
-    useGetNetworkConfig,
-} from "@elrondnetwork/dapp-core";
+import { useGetNetworkConfig } from "@elrondnetwork/dapp-core/hooks";
+import { AccountInfoSliceNetworkType } from "@elrondnetwork/dapp-core/types";
 import IconNewTab from "assets/svg/new-tab.svg";
+import { accAddressState, accIsLoggedInState } from "atoms/dappState";
 import BaseModal from "components/BaseModal";
 import { ASHSWAP_CONFIG } from "const/ashswapConfig";
 import pools from "const/pool";
@@ -14,6 +11,7 @@ import { useScreenSize } from "hooks/useScreenSize";
 import IPool from "interface/pool";
 import { IToken } from "interface/token";
 import { useCallback, useEffect, useMemo } from "react";
+import { useRecoilValue } from "recoil";
 import useSWR from "swr";
 
 const getTokenFromPools = (...pools: IPool[]) => {
@@ -56,8 +54,8 @@ interface TXRecord {
 }
 
 const HistoryModal = ({ open, onClose }: Props) => {
-    const { isLoggedIn: loggedIn } = useGetLoginInfo();
-    const { address } = useGetAccountInfo();
+    const loggedIn = useRecoilValue(accIsLoggedInState);
+    const address = useRecoilValue(accAddressState);
     const { data: txHistory, mutate: refresh } = useSWR<TXRecord[]>(
         loggedIn
             ? `${ASHSWAP_CONFIG.ashApiBaseUrl}/user/${address}/transaction`

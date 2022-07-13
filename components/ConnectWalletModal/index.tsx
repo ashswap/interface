@@ -1,11 +1,7 @@
-import { loginServices, useGetLoginInfo } from "@elrondnetwork/dapp-core";
-import { walletIsOpenConnectModalState } from "atoms/walletState";
-import BaseModal from "components/BaseModal";
-import Image from "next/image";
-import platform from "platform";
-import QRCode from "qrcode";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRecoilState } from "recoil";
+import {
+    useExtensionLogin,
+    useWalletConnectLogin,
+} from "@elrondnetwork/dapp-core/hooks";
 import connectWalletBg from "assets/images/connect-wallet-bg.png";
 import downloadAppGallery from "assets/images/download-app-gallery.png";
 import downloadAppStore from "assets/images/download-app-store.png";
@@ -13,6 +9,14 @@ import downloadPlayStore from "assets/images/download-play-store.png";
 import maiarLogo from "assets/images/maiar-logo.png";
 import ICConnectApp from "assets/svg/connect-app.svg";
 import ICConnectExtension from "assets/svg/connect-extension.svg";
+import { accIsLoggedInState } from "atoms/dappState";
+import { walletIsOpenConnectModalState } from "atoms/walletState";
+import BaseModal from "components/BaseModal";
+import Image from "next/image";
+import platform from "platform";
+import QRCode from "qrcode";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRecoilState } from "recoil";
 
 const MAIAR_WALLET_LINK = {
     PLAY_STORE: "https://maiar.onelink.me/HLcx/52dcde54",
@@ -23,7 +27,7 @@ const MAIAR_WALLET_LINK = {
 };
 
 function ConnectWalletModal() {
-    const { isLoggedIn: loggedIn } = useGetLoginInfo();
+    const loggedIn = useRecoilState(accIsLoggedInState);
     const [isOpenConnectWalletModal, setIsOpenConnectWalletModal] =
         useRecoilState(walletIsOpenConnectModalState);
 
@@ -31,7 +35,7 @@ function ConnectWalletModal() {
     const [isOpenDownloadExtension, setIsOpenDownloadExtension] =
         useState(false);
     const [isOpenDownloadApp, setIsOpenDownloadApp] = useState(false);
-    const [extensionLogin] = loginServices.useExtensionLogin({
+    const [extensionLogin] = useExtensionLogin({
         callbackRoute: "",
     });
     useEffect(() => {
@@ -300,7 +304,7 @@ const WalletConnect = ({
         initConnect,
         { error, isLoading, isLoggedIn, loginFailed },
         { uriDeepLink, walletConnectUri },
-    ] = loginServices.useWalletConnectLogin({
+    ] = useWalletConnectLogin({
         callbackRoute: "",
         logoutRoute: "",
     });

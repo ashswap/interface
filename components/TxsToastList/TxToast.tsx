@@ -1,4 +1,5 @@
-import React, {
+import moment from "moment";
+import {
     Fragment,
     useCallback,
     useEffect,
@@ -6,35 +7,32 @@ import React, {
     useRef,
     useState,
 } from "react";
-import moment from "moment";
-import IconNewTab from "assets/svg/new-tab-green.svg";
+
 import {
-    AccountInfoSliceNetworkType,
-    getAddressFromDataField,
-    getIsTransactionPending,
-    getIsTransactionSuccessful,
-    getIsTransactionTimedOut,
-    isBatchTransactionPending,
-    isServerTransactionPending,
-    SignedTransactionsType,
-    SignedTransactionType,
-    TransactionBatchStatusesEnum,
-    TransactionServerStatusesEnum,
-    transactionServices,
     useGetNetworkConfig,
     useGetSignedTransactions,
     useGetTransactionDisplayInfo,
-} from "@elrondnetwork/dapp-core";
-import ToastProgress from "./ToastProgress";
-import { notification } from "antd";
+} from "@elrondnetwork/dapp-core/hooks";
+import {
+    AccountInfoSliceNetworkType,
+    SignedTransactionType,
+    TransactionBatchStatusesEnum,
+    TransactionServerStatusesEnum,
+} from "@elrondnetwork/dapp-core/types";
+import {
+    getIsTransactionPending,
+    getIsTransactionSuccessful,
+    getIsTransactionTimedOut,
+    isServerTransactionPending,
+} from "@elrondnetwork/dapp-core/utils";
 import { Transition } from "@headlessui/react";
-import ICHourGlass from "assets/svg/hourglass.svg";
-import ICChevronRight from "assets/svg/chevron-right.svg";
-import ICChevronLeft from "assets/svg/chevron-left.svg";
-import ICCopy from "assets/svg/copy.svg";
-import ICNewTabRound from "assets/svg/new-tab-round.svg";
 import ICCheck from "assets/svg/check.svg";
+import ICChevronLeft from "assets/svg/chevron-left.svg";
+import ICChevronRight from "assets/svg/chevron-right.svg";
 import IClose from "assets/svg/close.svg";
+import ICCopy from "assets/svg/copy.svg";
+import ICHourGlass from "assets/svg/hourglass.svg";
+import ICNewTabRound from "assets/svg/new-tab-round.svg";
 import CopyBtn from "components/CopyBtn";
 const averageTxDurationMs = 6000;
 const crossShardRounds = 5;
@@ -65,7 +63,6 @@ const StatusIconMap: Record<
         <div className="w-4 h-4 rounded-full border-2 border-ash-purple-500 border-t-transparent animate-spin"></div>
     ),
     success: <ICCheck className="w-4 h-4 text-stake-green-500" />,
-    completed: <ICCheck className="w-4 h-4 text-stake-green-500" />,
     fail: <IClose className="w-4 h-4 text-ash-purple-500" />,
     invalid: <IClose className="w-4 h-4 text-ash-purple-500" />,
     executed: <></>,
@@ -123,7 +120,7 @@ export const TxToast = ({
     endTimeProgress,
     lifetimeAfterSuccess,
     collapsed,
-    onCollapsedChange
+    onCollapsedChange,
 }: TransactionToastPropsType) => {
     const ref = useRef(null);
     const [shouldRender, setShouldRender] = useState(true);

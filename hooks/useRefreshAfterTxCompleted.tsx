@@ -1,12 +1,13 @@
-import { transactionServices } from "@elrondnetwork/dapp-core";
+import {
+    useGetFailedTransactions,
+    useGetSuccessfulTransactions,
+} from "@elrondnetwork/dapp-core/hooks";
 import { useEffect, useMemo } from "react";
 import { useFetchBalances } from "./useFetchBalances";
 
 export const useRefreshAfterTxCompleted = () => {
-    const { failedTransactionsArray } =
-        transactionServices.useGetFailedTransactions();
-    const { successfulTransactionsArray } =
-        transactionServices.useGetSuccessfulTransactions();
+    const { failedTransactionsArray } = useGetFailedTransactions();
+    const { successfulTransactionsArray } = useGetSuccessfulTransactions();
     const fetchBalances = useFetchBalances();
     const txsCount = useMemo(() => {
         return (

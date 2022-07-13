@@ -1,0 +1,1 @@
+export type NFTType = "NonFungibleESDT" | "SemiFungibleESDT" | "MetaESDT";

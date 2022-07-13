@@ -2,7 +2,6 @@ import {
     Address,
     BigUIntValue,
     ContractFunction,
-    GasLimit,
     TokenIdentifierValue,
 } from "@elrondnetwork/erdjs/out";
 import BigNumber from "bignumber.js";
@@ -29,13 +28,11 @@ const usePoolRemoveLP = () => {
             ) => {
                 let tx = await createTx(new Address(pool.address), {
                     func: new ContractFunction("ESDTTransfer"),
-                    gasLimit: new GasLimit(9_000_000),
+                    gasLimit: 9_000_000,
                     args: [
-                        new TokenIdentifierValue(Buffer.from(pool.lpToken.id)),
+                        new TokenIdentifierValue(pool.lpToken.id),
                         new BigUIntValue(liquidity),
-                        new TokenIdentifierValue(
-                            Buffer.from("removeLiquidity")
-                        ),
+                        new TokenIdentifierValue("removeLiquidity"),
                         new BigUIntValue(
                             new BigNumber(
                                 v0.multipliedBy(1 - slippage).toFixed(0)

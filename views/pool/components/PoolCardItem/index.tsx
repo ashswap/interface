@@ -1,7 +1,5 @@
-import {
-    AccountInfoSliceNetworkType,
-    useGetNetworkConfig,
-} from "@elrondnetwork/dapp-core";
+import { useGetNetworkConfig } from "@elrondnetwork/dapp-core/hooks";
+import { AccountInfoSliceNetworkType } from "@elrondnetwork/dapp-core/types";
 import Down from "assets/svg/down-white.svg";
 import { PoolsState } from "atoms/poolsState";
 import AddLiquidityModal from "components/AddLiquidityModal";

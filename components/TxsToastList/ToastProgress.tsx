@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import moment from "moment";
-import { logarithmicRest, storage } from "@elrondnetwork/dapp-core";
+import { logarithmicRest, storage } from "@elrondnetwork/dapp-core/utils";
+
 interface Props {
     id: string;
     done: boolean;
@@ -118,8 +119,7 @@ const ToastProgress = ({
                 aria-valuenow={percentRemaining}
                 aria-valuemin={0}
                 aria-valuemax={100}
-            >
-            </div>
+            ></div>
             <div className="d-flex position-absolute w-100">{children}</div>
         </div>
     );

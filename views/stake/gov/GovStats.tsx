@@ -1,10 +1,11 @@
-import { transactionServices, useGetLoginInfo } from "@elrondnetwork/dapp-core";
+import { useTrackTransactionStatus } from "@elrondnetwork/dapp-core/hooks";
 import ICCapacity from "assets/svg/capacity.svg";
 import ICChevronDown from "assets/svg/chevron-down.svg";
 import ICChevronUp from "assets/svg/chevron-up.svg";
 import ICLock from "assets/svg/lock.svg";
 import ICUnlock from "assets/svg/unlock.svg";
 import ICWallet from "assets/svg/wallet.svg";
+import { accIsLoggedInState } from "atoms/dappState";
 import {
     govLockedAmtState,
     govRewardLPAmtState,
@@ -14,7 +15,7 @@ import {
     govTotalLockedPctState,
     govTotalSupplyVeASH,
     govUnlockTSState,
-    govVeASHAmtState
+    govVeASHAmtState,
 } from "atoms/govState";
 import { walletTokenPriceState } from "atoms/walletState";
 import Avatar from "components/Avatar";
@@ -79,14 +80,14 @@ function GovStats() {
     const [openStakeGov, setOpenStakeGov] = useState(false);
     const [openHarvestResult, setOpenHarvestResult] = useState(false);
     const [harvestId, setHarvestId] = useState("");
-    transactionServices.useTrackTransactionStatus({
+    useTrackTransactionStatus({
         transactionId: harvestId,
         onSuccess: () => setOpenHarvestResult(true),
     });
 
     const claimReward = useGovClaimReward();
     const unlockASH = useGovUnlockASH();
-    const { isLoggedIn: loggedIn } = useGetLoginInfo();
+    const loggedIn = useRecoilValue(accIsLoggedInState);
     const mounted = useMounted();
     const connectWallet = useConnectWallet();
     const tokenPrices = useRecoilValue(walletTokenPriceState);
@@ -392,8 +393,7 @@ function GovStats() {
                                 PERCENTAGE of total ASH Locked
                             </div>
                             <div className="text-white text-lg font-bold leading-tight">
-                                {formatAmount(totalLockedPct)}
-                                %
+                                {formatAmount(totalLockedPct)}%
                             </div>
                         </div>
                         <div className="bg-ash-dark-400/30 px-[2.375rem] py-7 flex flex-col justify-between">

@@ -1,4 +1,5 @@
-import { NotificationTypesEnum, useGetNotification } from "@elrondnetwork/dapp-core";
+import { useGetNotification } from "@elrondnetwork/dapp-core/hooks";
+import { NotificationTypesEnum } from "@elrondnetwork/dapp-core/types";
 import { Transition } from "@headlessui/react";
 import ICClose from "assets/svg/close.svg";
 import React, { Fragment, useEffect, useMemo } from "react";
@@ -6,11 +7,14 @@ import { useDebounce } from "use-debounce";
 
 function SignTxNotification() {
     const { notification: rawNoti, clearNotification } = useGetNotification();
-    const show = useMemo(() => !!rawNoti && rawNoti.type !== NotificationTypesEnum.success, [rawNoti])
+    const show = useMemo(
+        () => !!rawNoti && rawNoti.type !== NotificationTypesEnum.success,
+        [rawNoti]
+    );
     const [notification] = useDebounce(rawNoti, show ? 0 : 300);
     useEffect(() => {
-        clearNotification()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        clearNotification();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     return (
         <Transition
@@ -27,7 +31,14 @@ function SignTxNotification() {
                 <div className="clip-corner-4 clip-corner-br p-4 bg-ash-dark-600/80 backdrop-blur-[30px]">
                     <div className="flex">
                         <div className="py-4 pl-6 pr-4">
-                            <div className={`font-bold mb-2 ${notification?.type === NotificationTypesEnum.warning ? "text-yellow-500" : "text-pink-600"}`}>
+                            <div
+                                className={`font-bold mb-2 ${
+                                    notification?.type ===
+                                    NotificationTypesEnum.warning
+                                        ? "text-yellow-500"
+                                        : "text-pink-600"
+                                }`}
+                            >
                                 {notification?.title}
                             </div>
                             <div className="text-xs">
@@ -35,8 +46,11 @@ function SignTxNotification() {
                             </div>
                         </div>
                         <div>
-                            <button className="w-10 h-10 flex items-center justify-center text-white bg-ash-dark-600 hover:bg-ash-dark-400" onClick={() => clearNotification()}>
-                                <ICClose/>
+                            <button
+                                className="w-10 h-10 flex items-center justify-center text-white bg-ash-dark-600 hover:bg-ash-dark-400"
+                                onClick={() => clearNotification()}
+                            >
+                                <ICClose />
                             </button>
                         </div>
                     </div>

@@ -2,6 +2,7 @@
 const withFonts = require("next-fonts");
 const withReactSvg = require("next-react-svg");
 const path = require("path");
+const withTM = require('next-transpile-modules')(['@elrondnetwork/dapp-core', 'react-redux']);
 
 const { withSentryConfig } = require("@sentry/nextjs");
 
@@ -25,6 +26,8 @@ const moduleExports = withReactSvg(
     })
 );
 
+const moduleWithTM = withTM(moduleExports);
+
 const sentryWebpackPluginOptions = {
     // Additional config options for the Sentry Webpack plugin. Keep in mind that
     // the following options are set automatically, and overriding them is not
@@ -39,7 +42,7 @@ const sentryWebpackPluginOptions = {
 
 // Make sure adding Sentry options is the last code to run before exporting, to
 // ensure that your source maps include changes from all other Webpack plugins
-module.exports = withSentryConfig(moduleExports, sentryWebpackPluginOptions);
+module.exports = withSentryConfig(moduleWithTM, sentryWebpackPluginOptions);
 
 // https://github.com/facebookexperimental/Recoil/issues/733
 // safely ignore recoil warning messages in dev (triggered by HMR)

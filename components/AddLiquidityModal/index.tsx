@@ -1,10 +1,9 @@
-import {
-    getProxyProvider,
-    useGetAccountInfo,
-    useGetLoginInfo,
-} from "@elrondnetwork/dapp-core";
 import IconRight from "assets/svg/right-white.svg";
 import { addLPSessionIdAtom } from "atoms/addLiquidity";
+import {
+    accIsInsufficientEGLDState,
+    accIsLoggedInState
+} from "atoms/dappState";
 import { PoolsState } from "atoms/poolsState";
 import { walletBalanceState, walletTokenPriceState } from "atoms/walletState";
 import BigNumber from "bignumber.js";
@@ -16,6 +15,7 @@ import InputCurrency from "components/InputCurrency";
 import TextAmt from "components/TextAmt";
 import OnboardTooltip from "components/Tooltip/OnboardTooltip";
 import { toEGLDD, toWei } from "helper/balance";
+import { getProxyNetworkProvider } from "helper/proxy/util";
 import { useCreateTransaction } from "helper/transactionMethods";
 import { useOnboarding } from "hooks/useOnboarding";
 import usePoolAddLP from "hooks/usePoolContract/usePoolAddLP";
@@ -134,9 +134,9 @@ const AddLiquidityContent = ({ open, onClose, poolData }: Props) => {
     const balances = useRecoilValue(walletBalanceState);
     const tokenPrices = useRecoilValue(walletTokenPriceState);
     // end recoil
-    const { isLoggedIn: loggedIn } = useGetLoginInfo();
-    const { address, account } = useGetAccountInfo();
-    const proxy = getProxyProvider();
+    const loggedIn = useRecoilValue(accIsLoggedInState);
+    const isInsufficientEGLD = useRecoilValue(accIsInsufficientEGLDState);
+    const proxy = getProxyNetworkProvider();
     const { pool, poolStats, liquidityData } = poolData;
     const [onboardingDepositInput, setOnboardedDepositInput] =
         useOnboarding("pool_deposit_input");
@@ -280,7 +280,7 @@ const AddLiquidityContent = ({ open, onClose, poolData }: Props) => {
         const v1 = new BigNumber(value1 || "0");
         return (
             isAgree &&
-            account.balance !== "0" &&
+            !isInsufficientEGLD &&
             !isInsufficentFund0 &&
             !isInsufficentFund1 &&
             !adding &&
@@ -288,9 +288,9 @@ const AddLiquidityContent = ({ open, onClose, poolData }: Props) => {
         );
     }, [
         isAgree,
-        account.balance,
         isInsufficentFund0,
         isInsufficentFund1,
+        isInsufficientEGLD,
         adding,
         value0,
         value1,
@@ -448,7 +448,7 @@ const AddLiquidityContent = ({ open, onClose, poolData }: Props) => {
                             disabled={!canAddLP}
                             onClick={canAddLP ? addLP : () => {}}
                         >
-                            {account.balance === "0"
+                            {isInsufficientEGLD
                                 ? "INSUFFICIENT EGLD BALANCE"
                                 : "DEPOSIT"}
                         </GlowingButton>

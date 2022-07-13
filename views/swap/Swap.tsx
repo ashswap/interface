@@ -1,13 +1,8 @@
-import {
-    transactionServices,
-    useGetAccountInfo,
-    useGetLoginInfo,
-} from "@elrondnetwork/dapp-core";
+import { useTrackTransactionStatus } from "@elrondnetwork/dapp-core/hooks";
 import {
     Address,
     BigUIntValue,
     ContractFunction,
-    GasLimit,
     TokenIdentifierValue,
     Transaction,
 } from "@elrondnetwork/erdjs";
@@ -20,6 +15,10 @@ import IconClose from "assets/svg/close.svg";
 import IconRight from "assets/svg/right-white.svg";
 import ICSetting from "assets/svg/setting.svg";
 import IconWallet from "assets/svg/wallet.svg";
+import {
+    accIsInsufficientEGLDState,
+    accIsLoggedInState,
+} from "atoms/dappState";
 import BigNumber from "bignumber.js";
 import Avatar from "components/Avatar";
 import BaseButton from "components/BaseButton";
@@ -34,7 +33,7 @@ import OnboardTooltip from "components/Tooltip/OnboardTooltip";
 import { useSwap } from "context/swap";
 import { toEGLD, toEGLDD, toWei } from "helper/balance";
 import { cancellablePromise } from "helper/cancellablePromise";
-import { queryPoolContract } from "helper/contracts/pool";
+import PoolContract, { queryPoolContract } from "helper/contracts/pool";
 import { formatAmount } from "helper/number";
 import {
     sendTransactions,
@@ -48,6 +47,7 @@ import { DappSendTransactionsPropsType } from "interface/dappCore";
 import IPool from "interface/pool";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRecoilValue } from "recoil";
 import { useDebounce } from "use-debounce";
 import SwapAmount from "./components/SwapAmount";
 import styles from "./Swap.module.css";
@@ -151,15 +151,14 @@ const Swap = () => {
     const [swapId, setSwapId] = useState("");
     const [onboardingHistory, setOnboardedHistory] =
         useOnboarding("swap_history");
-    const { isPending, isSuccessful } =
-        transactionServices.useTrackTransactionStatus({
-            transactionId: swapId,
-        });
+    const { isPending, isSuccessful } = useTrackTransactionStatus({
+        transactionId: swapId,
+    });
     const [fetchingAmtOut, setFetchingAmtOut] = useState(false);
 
     const connectWallet = useConnectWallet();
-    const { isLoggedIn: loggedIn } = useGetLoginInfo();
-    const { account } = useGetAccountInfo();
+    const loggedIn = useRecoilValue(accIsLoggedInState);
+    const isInsufficientEGLD = useRecoilValue(accIsInsufficientEGLDState);
     const createTx = useCreateTransaction();
 
     const [onboardingFairPrice, setOnboaredFairPrice] =
@@ -243,15 +242,14 @@ const Swap = () => {
             return;
         }
 
+        const poolContract = new PoolContract(pool.address);
         Promise.all([
-            queryPoolContract.getAmountOut(
-                pool.address,
+            poolContract.getAmountOut(
                 token1.id,
                 token2.id,
                 new BigNumber(10).exponentiatedBy(token1.decimals)
             ),
-            queryPoolContract.getAmountOut(
-                pool.address,
+            poolContract.getAmountOut(
                 token2.id,
                 token1.id,
                 new BigNumber(10).exponentiatedBy(token2.decimals)
@@ -287,26 +285,24 @@ const Swap = () => {
             if (pool.isMaiarPool) {
                 tx = await createTx(new Address(pool.address), {
                     func: new ContractFunction("ESDTTransfer"),
-                    gasLimit: new GasLimit(8_000_000),
+                    gasLimit: 8_000_000,
                     args: [
-                        new TokenIdentifierValue(Buffer.from(tokenFrom.id)),
+                        new TokenIdentifierValue(tokenFrom.id),
                         new BigUIntValue(rawValueFrom),
-                        new TokenIdentifierValue(
-                            Buffer.from("swapTokensFixedInput")
-                        ),
-                        new TokenIdentifierValue(Buffer.from(tokenTo.id)),
+                        new TokenIdentifierValue("swapTokensFixedInput"),
+                        new TokenIdentifierValue(tokenTo.id),
                         new BigUIntValue(minAmtOut),
                     ],
                 });
             } else {
                 tx = await createTx(new Address(pool?.address), {
                     func: new ContractFunction("ESDTTransfer"),
-                    gasLimit: new GasLimit(8_000_000),
+                    gasLimit: 8_000_000,
                     args: [
-                        new TokenIdentifierValue(Buffer.from(tokenFrom.id)),
+                        new TokenIdentifierValue(tokenFrom.id),
                         new BigUIntValue(rawValueFrom),
-                        new TokenIdentifierValue(Buffer.from("exchange")),
-                        new TokenIdentifierValue(Buffer.from(tokenTo.id)),
+                        new TokenIdentifierValue("exchange"),
+                        new TokenIdentifierValue(tokenTo.id),
                         new BigUIntValue(minAmtOut),
                     ],
                 });
@@ -777,7 +773,7 @@ const Swap = () => {
                                             swapping ||
                                             fetchingAmtOut ||
                                             isInsufficentFund ||
-                                            account.balance === "0"
+                                            isInsufficientEGLD
                                         }
                                         onClick={
                                             loggedIn
@@ -788,11 +784,11 @@ const Swap = () => {
                                         <div className="flex items-center space-x-2.5">
                                             {!loggedIn && <IconWallet />}
                                             {isInsufficentFund ||
-                                            account.balance === "0" ? (
+                                            isInsufficientEGLD ? (
                                                 <span className="text-text-input-3">
                                                     INSUFFICIENT{" "}
                                                     <span className="text-insufficent-fund">
-                                                        {account.balance === "0"
+                                                        {isInsufficientEGLD
                                                             ? "EGLD"
                                                             : tokenFrom?.symbol}
                                                     </span>{" "}

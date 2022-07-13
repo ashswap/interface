@@ -2,7 +2,6 @@ import {
     Address,
     BigUIntValue,
     ContractFunction,
-    GasLimit,
     TokenIdentifierValue,
     Transaction,
     U64Value,
@@ -41,15 +40,11 @@ const useGovLockMore = () => {
                         ),
                         {
                             func: new ContractFunction("ESDTTransfer"),
-                            gasLimit: new GasLimit(7_000_000),
+                            gasLimit: 7_000_000,
                             args: [
-                                new TokenIdentifierValue(
-                                    Buffer.from(ASH_TOKEN.id)
-                                ),
+                                new TokenIdentifierValue(ASH_TOKEN.id),
                                 new BigUIntValue(weiAmt),
-                                new TokenIdentifierValue(
-                                    Buffer.from("increase_amount")
-                                ),
+                                new TokenIdentifierValue("increase_amount"),
                             ],
                         }
                     );
@@ -62,7 +57,7 @@ const useGovLockMore = () => {
                         ),
                         {
                             func: new ContractFunction("increase_unlock_time"),
-                            gasLimit: new GasLimit(7_000_000),
+                            gasLimit: 7_000_000,
                             args: [new U64Value(unlockTimestamp)],
                         }
                     );

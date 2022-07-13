@@ -1,14 +1,9 @@
 import {
-    getApiProvider,
-    getProxyProvider
-} from "@elrondnetwork/dapp-core";
-import {
     Address,
     AddressValue,
-    ApiProvider,
     BigUIntValue,
-    ContractFunction, ProxyProvider,
-    Query
+    ContractFunction,
+    Query,
 } from "@elrondnetwork/erdjs";
 import { accAddressState, accIsLoggedInState } from "atoms/dappState";
 import {
@@ -20,7 +15,7 @@ import {
     govTotalLockedPctState,
     govTotalSupplyVeASH,
     govUnlockTSState,
-    govVeASHAmtState
+    govVeASHAmtState,
 } from "atoms/govState";
 import BigNumber from "bignumber.js";
 import { ASHSWAP_CONFIG } from "const/ashswapConfig";
@@ -28,13 +23,15 @@ import { blockTimeMs } from "const/dappConfig";
 import pools from "const/pool";
 import { ASH_TOKEN } from "const/tokens";
 import { toWei } from "helper/balance";
+import {
+    getApiNetworkProvider,
+    getProxyNetworkProvider,
+} from "helper/proxy/util";
 import { queryContractParser } from "helper/serializer";
 import useInterval from "hooks/useInterval";
 import useLPValue from "hooks/usePoolContract/useLPValue";
 import moment from "moment";
-import {
-    useCallback, useEffect
-} from "react";
+import { useCallback, useEffect } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 const GovState = () => {
@@ -56,8 +53,8 @@ const GovState = () => {
 
     const getLPValue = useLPValue();
 
-    const proxy: ProxyProvider = getProxyProvider();
-    const apiProvider: ApiProvider = getApiProvider();
+    const proxy = getProxyNetworkProvider();
+    const apiProvider = getApiNetworkProvider();
 
     useEffect(() => {
         if (!loggedIn) {
@@ -201,14 +198,19 @@ const GovState = () => {
             setRewardValue(new BigNumber(0));
             return;
         }
-        const {lpValueUsd: value} = await getLPValue(rewardLPAmt, rewardLPToken);
+        const { lpValueUsd: value } = await getLPValue(
+            rewardLPAmt,
+            rewardLPToken
+        );
         setRewardValue(value || new BigNumber(0));
     }, [rewardLPAmt, rewardLPToken, getLPValue, setRewardValue]);
 
     const getASHTotalSupply = useCallback(() => {
-        return apiProvider.getToken(ASH_TOKEN.id).then(({ supply }) => {
-            return toWei(ASH_TOKEN, supply || "0");
-        });
+        return apiProvider
+            .getDefinitionOfFungibleToken(ASH_TOKEN.id)
+            .then(({ supply }) => {
+                return toWei(ASH_TOKEN, supply.toString(10) || "0");
+            });
     }, [apiProvider]);
 
     const getTotalLockedASHPct = useCallback(async () => {

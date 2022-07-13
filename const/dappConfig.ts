@@ -1,7 +1,5 @@
-import {
-    CustomNetworkType,
-    fallbackNetworkConfigurations,
-} from "@elrondnetwork/dapp-core";
+import { CustomNetworkType } from "@elrondnetwork/dapp-core/types";
+import { fallbackNetworkConfigurations } from "@elrondnetwork/dapp-core/constants";
 import { ENVIRONMENT } from "./env";
 export const gasPrice = 1000000000;
 export const version = 1;
@@ -23,5 +21,5 @@ export const DAPP_CONFIG: CustomNetworkType =
 export const CHAIN_ID = {
     DEVNET: "D",
     TESTNET: "T",
-    MAINNET: "1"
+    MAINNET: "1",
 } as const;

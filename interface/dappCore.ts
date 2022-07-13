@@ -1,4 +1,4 @@
-import { SendTransactionsPropsType } from "@elrondnetwork/dapp-core";
+import { SendTransactionsPropsType } from "@elrondnetwork/dapp-core/types";
 import { Modify } from "./utilities";
 
 export type DappSendTransactionsPropsType = Modify<

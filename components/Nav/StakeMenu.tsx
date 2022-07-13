@@ -1,4 +1,3 @@
-import { transactionServices } from "@elrondnetwork/dapp-core";
 import ImgLPGem from "assets/images/lp-gem.png";
 import ImgMintGem from "assets/images/mint-gem.png";
 import ImgVoteGem from "assets/images/vote-gem.png";
@@ -23,6 +22,7 @@ import ICGovStatsSquare from "assets/svg/gov-stats-square.svg";
 import ICGovFarmSquare from "assets/svg/gov-farm-square.svg";
 import ICGovBoostSquare from "assets/svg/gov-boost-square.svg";
 import ICGovVoteSquare from "assets/svg/gov-vote-square.svg";
+import { useTrackTransactionStatus } from "@elrondnetwork/dapp-core/hooks";
 const SOCIALS = [
     {
         name: "Liquidity Stake",
@@ -51,7 +51,7 @@ function StakeMenu() {
     const [openTooltip, setOpenTooltip] = useState(false);
     const router = useRouter();
     const addLPSessionId = useRecoilValue(addLPSessionIdAtom);
-    const { isSuccessful } = transactionServices.useTrackTransactionStatus({
+    const { isSuccessful } = useTrackTransactionStatus({
         transactionId: addLPSessionId,
     });
     const [onboaringFarmFromAddedLp, setOnboardedFarmFromAddedLp] =

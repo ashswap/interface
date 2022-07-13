@@ -1,11 +1,8 @@
-import { getProxyProvider } from "@elrondnetwork/dapp-core";
-import {
-    Address,
-    ProxyProvider,
-    TokenOfAccountOnNetwork,
-} from "@elrondnetwork/erdjs/out";
+import { FungibleTokenOfAccountOnNetwork } from "@elrondnetwork/erdjs-network-providers/out";
+import { Address } from "@elrondnetwork/erdjs/out";
 import { accAddressState, accIsLoggedInState } from "atoms/dappState";
 import { walletBalanceState } from "atoms/walletState";
+import { getProxyNetworkProvider } from "helper/proxy/util";
 import { useRecoilCallback } from "recoil";
 
 export const useFetchBalances = () => {
@@ -21,20 +18,18 @@ export const useFetchBalances = () => {
                         set(walletBalanceState, {});
                         return;
                     }
-                    const proxy: ProxyProvider = getProxyProvider();
+                    const proxy = getProxyNetworkProvider();
+                    FungibleTokenOfAccountOnNetwork;
                     proxy
-                        .getAddressEsdtList(new Address(address))
+                        .getFungibleTokensOfAccount(new Address(address))
                         .then((resp) => {
-                            let tokenBalancesEntries: [
-                                string,
-                                TokenOfAccountOnNetwork
-                            ][] = (resp || []).map((val) => [
-                                val.tokenIdentifier,
+                            const entries = resp.map((val) => [
+                                val.identifier,
                                 val,
                             ]);
                             set(
                                 walletBalanceState,
-                                Object.fromEntries(tokenBalancesEntries)
+                                Object.fromEntries(entries)
                             );
                         });
                 } catch (error) {

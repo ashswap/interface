@@ -1,42 +1,39 @@
+import { sendTransactions as _sendTxs } from "@elrondnetwork/dapp-core/services";
 import {
     AccountInfoSliceNetworkType,
-    getAccountProvider,
-    getProxyProvider,
-    transactionServices,
-    useGetAccountInfo,
-    useGetLoginInfo,
-    useGetNetworkConfig
-} from "@elrondnetwork/dapp-core";
+    LoginMethodsEnum,
+} from "@elrondnetwork/dapp-core/types";
+import {
+    getAccountProviderType,
+    getIsLoggedIn,
+    getNetworkConfig,
+} from "@elrondnetwork/dapp-core/utils";
+import { ExtensionProvider } from "@elrondnetwork/erdjs-extension-provider/out";
 import {
     Address,
     CallArguments,
-    ChainID,
-    ExtensionProvider,
-    GasLimit,
-    GasPrice, IDappProvider,
-    Nonce,
-    ProxyProvider,
     SmartContract,
-    Transaction
+    Transaction,
 } from "@elrondnetwork/erdjs/out";
-import {
-    gasLimitBuffer,
-    gasPrice,
-    maxGasLimit
-} from "const/dappConfig";
+import { accAddressState } from "atoms/dappState";
+import { gasLimitBuffer, gasPrice, maxGasLimit } from "const/dappConfig";
 import { DappSendTransactionsPropsType } from "interface/dappCore";
+import { useRecoilValue } from "recoil";
+import { getProxyNetworkProvider } from "./proxy/util";
 const emptyTx = new Transaction({
-    nonce: new Nonce(0),
-    receiver: new Address(),
+    nonce: 0,
+    receiver: new Address(""),
+    chainID: "",
+    gasLimit: 0,
 });
 // flow create TXS -> set nonce -> sign TXS -> send TXS -> update local nonce
 export const useCreateTransaction = () => {
-    const { isLoggedIn } = useGetLoginInfo();
-    const { address } = useGetAccountInfo();
-    const proxy: ProxyProvider = getProxyProvider();
-    const network: AccountInfoSliceNetworkType = useGetNetworkConfig().network;
+    const isLoggedIn = getIsLoggedIn();
+    const address = useRecoilValue(accAddressState);
+    const proxy = getProxyNetworkProvider();
+    const network: AccountInfoSliceNetworkType = getNetworkConfig();
     /** Create transaction with nonce = 0, set nonce with useSetTransactionsNonce or let useSignTransactions handle it automaticlly  */
-    return async (scAddress: Address, arg: CallArguments) => {
+    return async (scAddress: Address, arg: Omit<CallArguments, "chainID">) => {
         if (!isLoggedIn || !address || !proxy) {
             return emptyTx;
         }
@@ -45,27 +42,28 @@ export const useCreateTransaction = () => {
             address: scAddress,
         });
 
-        let tx = contract.call(arg);
+        let tx = contract.call({ ...arg, chainID: network.chainId });
         tx = new Transaction({
-            chainID: new ChainID(network.chainId),
+            chainID: network.chainId,
             data: tx.getData(),
             receiver: scAddress,
-            gasPrice: new GasPrice(gasPrice),
-            gasLimit: new GasLimit(
-                Math.min(
-                    Math.floor(arg.gasLimit.valueOf() * gasLimitBuffer),
-                    maxGasLimit
-                )
+            gasPrice: gasPrice,
+            gasLimit: Math.min(
+                Math.floor(arg.gasLimit.valueOf() * gasLimitBuffer),
+                maxGasLimit
             ),
             version: tx.getVersion(),
         });
         return tx;
     };
 };
-export const sendTransactions = async (payload: DappSendTransactionsPropsType) => {
-    const accProvider: IDappProvider = getAccountProvider();
-    if(accProvider instanceof ExtensionProvider){
+export const sendTransactions = async (
+    payload: DappSendTransactionsPropsType
+) => {
+    const accProviderType = getAccountProviderType();
+    if (accProviderType === LoginMethodsEnum.extension) {
         await ExtensionProvider.getInstance()?.cancelAction?.();
     }
-    return await transactionServices.sendTransactions(payload);
-}
+
+    return await _sendTxs(payload);
+};

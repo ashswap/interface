@@ -4,13 +4,16 @@ import {
     BigUIntValue,
     BooleanValue,
     ContractFunction,
-    GasLimit,
     TokenIdentifierValue,
     Transaction,
     TypedValue,
 } from "@elrondnetwork/erdjs/out";
 import { accAddressState, accIsLoggedInState } from "atoms/dappState";
-import { FarmRecord, farmRecordsState, farmSessionIdMapState, FarmToken } from "atoms/farmsState";
+import {
+    farmRecordsState,
+    farmSessionIdMapState,
+    FarmToken,
+} from "atoms/farmsState";
 import BigNumber from "bignumber.js";
 import { ASH_TOKEN } from "const/tokens";
 
@@ -33,37 +36,35 @@ const useFarmClaimReward = () => {
                 selfBoost: boolean = false
             ) => {
                 const loggedIn = await snapshot.getPromise(accIsLoggedInState);
-                const address: string = await snapshot.getPromise(accAddressState);
+                const address: string = await snapshot.getPromise(
+                    accAddressState
+                );
 
                 if (!loggedIn)
                     throw new Error("Connect wallet to claim reward");
 
-                    const farmTokenArgs = tokens.reduce(
-                        (total: TypedValue[], val) => {
-                            total = [
-                                ...total,
-                                new TokenIdentifierValue(
-                                    Buffer.from(val.collection)
-                                ),
-                                new BigUIntValue(val.nonce),
-                                new BigUIntValue(val.balance),
-                            ];
-                            return total;
-                        },
-                        []
-                    );
+                const farmTokenArgs = tokens.reduce(
+                    (total: TypedValue[], val) => {
+                        total = [
+                            ...total,
+                            new TokenIdentifierValue(val.collection),
+                            new BigUIntValue(val.nonce),
+                            new BigUIntValue(val.balance),
+                        ];
+                        return total;
+                    },
+                    []
+                );
                 return await createTransaction(new Address(address), {
                     func: new ContractFunction("MultiESDTNFTTransfer"),
-                    gasLimit: new GasLimit(15_000_000 + tokens.length * 2_000_000),
+                    gasLimit: 15_000_000 + tokens.length * 2_000_000,
                     args: [
                         new AddressValue(new Address(farm.farm_address)),
-                        new BigUIntValue(
-                            new BigNumber(tokens.length)
-                        ),
+                        new BigUIntValue(new BigNumber(tokens.length)),
 
                         ...farmTokenArgs,
-                        new TokenIdentifierValue(Buffer.from("claimRewards")),
-                        new BooleanValue(selfBoost)
+                        new TokenIdentifierValue("claimRewards"),
+                        new BooleanValue(selfBoost),
                     ],
                 });
             },
@@ -83,7 +84,11 @@ const useFarmClaimReward = () => {
 
                 try {
                     const { stakedData } = farmRecord;
-                    const tx = await createClaimRewardTxMulti(farmRecord.stakedData.farmTokens, farm, false);
+                    const tx = await createClaimRewardTxMulti(
+                        farmRecord.stakedData.farmTokens,
+                        farm,
+                        false
+                    );
                     const payload: DappSendTransactionsPropsType = {
                         transactions: tx,
                         transactionsDisplayInfo: {
@@ -120,7 +125,11 @@ const useFarmClaimReward = () => {
                 for (let i = 0; i < farmRecords.length; i++) {
                     const val = farmRecords[i];
                     if (val?.stakedData?.totalRewardAmt.gt(0)) {
-                        const temp = await createClaimRewardTxMulti(val.stakedData.farmTokens, val.farm, false);
+                        const temp = await createClaimRewardTxMulti(
+                            val.stakedData.farmTokens,
+                            val.farm,
+                            false
+                        );
                         txs = [...txs, temp];
                         totalASH = totalASH.plus(val.stakedData.totalRewardAmt);
                         farmsAddress.push(val.farm.farm_address);
@@ -155,7 +164,7 @@ const useFarmClaimReward = () => {
     return {
         claimReward,
         claimAllFarmsReward,
-        createClaimRewardTxMulti
+        createClaimRewardTxMulti,
     };
 };
 

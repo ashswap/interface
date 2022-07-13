@@ -1,14 +1,12 @@
-import { getProxyProvider } from "@elrondnetwork/dapp-core";
 import {
     Address,
     ArgSerializer,
     BigUIntValue,
     ContractFunction,
     EndpointParameterDefinition,
-    ProxyProvider,
     Query,
     TypeExpressionParser,
-    TypeMapper,
+    TypeMapper
 } from "@elrondnetwork/erdjs";
 import { Slider } from "antd";
 import IconRight from "assets/svg/right-yellow.svg";
@@ -25,18 +23,17 @@ import Token from "components/Token";
 import OnboardTooltip from "components/Tooltip/OnboardTooltip";
 import { useSwap } from "context/swap";
 import { toEGLD, toEGLDD, toWei } from "helper/balance";
+import { getProxyNetworkProvider } from "helper/proxy/util";
 import { useCreateTransaction } from "helper/transactionMethods";
 import { useFetchBalances } from "hooks/useFetchBalances";
 import { useOnboarding } from "hooks/useOnboarding";
 import usePoolRemoveLP from "hooks/usePoolContract/usePoolRemoveLP";
 import { useScreenSize } from "hooks/useScreenSize";
 import { Unarray } from "interface/utilities";
-import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { theme } from "tailwind.config";
 import { useDebounce } from "use-debounce";
-import styles from "./RemoveLiquidityModal.module.css";
 
 interface Props {
     open?: boolean;
@@ -62,7 +59,7 @@ const RemoveLPContent = ({ open, onClose, poolData }: Props) => {
     const [displayInputLiquidity, setDisplayInputLiquidity] =
         useState<string>("");
     const [removing, setRemoving] = useState(false);
-    const proxy: ProxyProvider = getProxyProvider();
+    const proxy = getProxyNetworkProvider();
     const [onboardingWithdrawInput, setOnboardedWithdrawInput] = useOnboarding(
         "pool_withdraw_input"
     );

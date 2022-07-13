@@ -1,4 +1,4 @@
-import { Address, ContractFunction, GasLimit } from "@elrondnetwork/erdjs/out";
+import { Address, ContractFunction } from "@elrondnetwork/erdjs/out";
 import { accIsLoggedInState } from "atoms/dappState";
 import { govLockedAmtState, govUnlockTSState } from "atoms/govState";
 import { ASHSWAP_CONFIG } from "const/ashswapConfig";
@@ -31,7 +31,7 @@ const useGovUnlockASH = () => {
                             ),
                             {
                                 func: new ContractFunction("withdraw"),
-                                gasLimit: new GasLimit(7_000_000),
+                                gasLimit: 7_000_000,
                             }
                         ),
                         transactionsDisplayInfo: {

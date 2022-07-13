@@ -1,4 +1,5 @@
-import { TokenOfAccountOnNetwork } from "@elrondnetwork/erdjs/out";
+
+import { FungibleTokenOfAccountOnNetwork } from "@elrondnetwork/erdjs-network-providers/out";
 import { ITokenMap } from "interface/token";
 import { atom } from "recoil";
 
@@ -8,7 +9,7 @@ export const walletLPMapState = atom<ITokenMap>({
 });
 
 export const walletBalanceState = atom<
-    Record<string, TokenOfAccountOnNetwork | null>
+    Record<string, FungibleTokenOfAccountOnNetwork | null>
 >({
     key: "wallet_balances",
     default: {},

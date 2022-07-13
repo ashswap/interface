@@ -1,10 +1,11 @@
 import {
-    SignedTransactionsBodyType,
-    SignedTransactionsType,
     useGetPendingTransactions,
     useGetSignedTransactions,
-} from "@elrondnetwork/dapp-core";
-import { PendingTransactionsType } from "@elrondnetwork/dapp-core/dist/apiCalls";
+} from "@elrondnetwork/dapp-core/hooks";
+import {
+    SignedTransactionsBodyType,
+    SignedTransactionsType,
+} from "@elrondnetwork/dapp-core/types";
 import {
     getToastsIdsFromStorage,
     setToastsIdsToStorage,
@@ -39,7 +40,7 @@ function TxsToastList({
     const signedTransactionsFromStore =
         useGetSignedTransactions().signedTransactions;
 
-    const pendingTransactionsToRender: PendingTransactionsType =
+    const pendingTransactionsToRender: SignedTransactionsType =
         pendingTransactions || pendingTransactionsFromStore;
 
     const signedTransactionsToRender: SignedTransactionsType =

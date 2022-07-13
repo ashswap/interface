@@ -3,7 +3,6 @@ import {
     AddressValue,
     BigUIntValue,
     ContractFunction,
-    GasLimit,
     TokenIdentifierValue,
 } from "@elrondnetwork/erdjs/out";
 import { accAddressState } from "atoms/dappState";
@@ -29,15 +28,11 @@ const usePoolAddLP = () => {
                 if (v0.eq(0)) {
                     tx = await createTx(new Address(pool.address), {
                         func: new ContractFunction("ESDTTransfer"),
-                        gasLimit: new GasLimit(10_000_000),
+                        gasLimit: 10_000_000,
                         args: [
-                            new TokenIdentifierValue(
-                                Buffer.from(pool.tokens[1].id)
-                            ),
+                            new TokenIdentifierValue(pool.tokens[1].id),
                             new BigUIntValue(v1),
-                            new TokenIdentifierValue(
-                                Buffer.from("addLiquidity")
-                            ),
+                            new TokenIdentifierValue("addLiquidity"),
                             new BigUIntValue(v0),
                             new BigUIntValue(v1),
                             new AddressValue(Address.Zero()),
@@ -50,15 +45,11 @@ const usePoolAddLP = () => {
                 } else if (v1.eq(0)) {
                     tx = await createTx(new Address(pool.address), {
                         func: new ContractFunction("ESDTTransfer"),
-                        gasLimit: new GasLimit(10_000_000),
+                        gasLimit: 10_000_000,
                         args: [
-                            new TokenIdentifierValue(
-                                Buffer.from(pool.tokens[0].id)
-                            ),
+                            new TokenIdentifierValue(pool.tokens[0].id),
                             new BigUIntValue(v0),
-                            new TokenIdentifierValue(
-                                Buffer.from("addLiquidity")
-                            ),
+                            new TokenIdentifierValue("addLiquidity"),
                             new BigUIntValue(v0),
                             new BigUIntValue(v1),
                             new AddressValue(Address.Zero()),
@@ -71,26 +62,20 @@ const usePoolAddLP = () => {
                 } else {
                     tx = await createTx(new Address(address), {
                         func: new ContractFunction("MultiESDTNFTTransfer"),
-                        gasLimit: new GasLimit(10_000_000),
+                        gasLimit: 10_000_000,
                         args: [
                             new AddressValue(new Address(pool.address)),
                             new BigUIntValue(new BigNumber(2)),
 
-                            new TokenIdentifierValue(
-                                Buffer.from(pool.tokens[0].id)
-                            ),
+                            new TokenIdentifierValue(pool.tokens[0].id),
                             new BigUIntValue(new BigNumber(0)),
                             new BigUIntValue(v0),
 
-                            new TokenIdentifierValue(
-                                Buffer.from(pool.tokens[1].id)
-                            ),
+                            new TokenIdentifierValue(pool.tokens[1].id),
                             new BigUIntValue(new BigNumber(0)),
                             new BigUIntValue(v1),
 
-                            new TokenIdentifierValue(
-                                Buffer.from("addLiquidity")
-                            ),
+                            new TokenIdentifierValue("addLiquidity"),
                             new BigUIntValue(v0),
                             new BigUIntValue(v1),
                             new AddressValue(Address.Zero()),

@@ -1,7 +1,3 @@
-import {
-    AccountInfoSliceNetworkType,
-    useGetNetworkConfig,
-} from "@elrondnetwork/dapp-core";
 import { accAddressState } from "atoms/dappState";
 import { FarmRecord } from "atoms/farmsState";
 import BigNumber from "bignumber.js";
@@ -13,6 +9,8 @@ import { formatAmount } from "helper/number";
 import React, { useMemo } from "react";
 import { useRecoilValue } from "recoil";
 import ICChevronRight from "assets/svg/chevron-right.svg";
+import { AccountInfoSliceNetworkType } from "@elrondnetwork/dapp-core/types";
+import { useGetNetworkConfig } from "@elrondnetwork/dapp-core/hooks";
 const EstimateInUSD = ({
     number,
     className,
@@ -43,7 +41,7 @@ function FarmBoostTooltip({
     booster: string;
     farmData: FarmRecord;
     lpAmt: BigNumber;
-    onSelfBoostTransferedToken?: () => {}
+    onSelfBoostTransferedToken?: () => {};
 }) {
     const farm = farmData.farm;
     const pool = useMemo(() => {

@@ -1,15 +1,15 @@
-import { getProxyProvider } from "@elrondnetwork/dapp-core";
+
 import {
     Address,
     BigUIntValue,
     BytesValue,
     ContractFunction,
-    ProxyProvider,
     Query,
 } from "@elrondnetwork/erdjs/out";
-import { accIsLoggedInState } from "atoms/dappState";
+import { accAddressState, accIsLoggedInState } from "atoms/dappState";
 import { walletBalanceState } from "atoms/walletState";
 import BigNumber from "bignumber.js";
+import { getProxyNetworkProvider } from "helper/proxy/util";
 import { IFarm } from "interface/farm";
 import { useRecoilCallback } from "recoil";
 
@@ -19,9 +19,12 @@ const useFarmReward = () => {
             async (farm: IFarm, amt: BigNumber, sftId: string) => {
                 const loggedIn = await snapshot.getPromise(accIsLoggedInState);
                 const balances = await snapshot.getPromise(walletBalanceState);
-                const proxy: ProxyProvider = getProxyProvider();
+                const address = await snapshot.getPromise(accAddressState);
+                const proxy = getProxyNetworkProvider();
                 if (!loggedIn) return new BigNumber(0);
-                const attributes = balances[sftId]?.attributes;
+                
+                const token = await proxy.getNonFungibleTokenOfAccount(new Address(address), farm.farm_token_id, parseInt(sftId.replace(farm.farm_token_id + "-", ""), 16));
+                const attributes = token.attributes;
                 if (!attributes) return new BigNumber(0);
                 const res = await proxy.queryContract(
                     new Query({

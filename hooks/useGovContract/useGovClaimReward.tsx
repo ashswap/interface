@@ -2,7 +2,6 @@ import {
     Address,
     AddressValue,
     ContractFunction,
-    GasLimit,
 } from "@elrondnetwork/erdjs/out";
 import { accAddressState, accIsLoggedInState } from "atoms/dappState";
 import { ASHSWAP_CONFIG } from "const/ashswapConfig";
@@ -29,14 +28,14 @@ const useGovClaimReward = () => {
                             func: new ContractFunction(
                                 "checkpoint_total_supply"
                             ),
-                            gasLimit: new GasLimit(7_000_000),
+                            gasLimit: 7_000_000,
                         }
                     );
                     const tx2 = await createTransaction(
                         new Address(ASHSWAP_CONFIG.dappContract.feeDistributor),
                         {
                             func: new ContractFunction("claim"),
-                            gasLimit: new GasLimit(500_000_000),
+                            gasLimit: 500_000_000,
                             args: [new AddressValue(new Address(address))],
                         }
                     );

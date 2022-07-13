@@ -1,13 +1,10 @@
-import {
-    logout,
-    useGetAccountInfo,
-    useGetLoginInfo
-} from "@elrondnetwork/dapp-core";
+import { logout } from "@elrondnetwork/dapp-core/utils";
 import ImgAvatar from "assets/images/avatar.png";
 import IconChange from "assets/svg/change.svg";
 import ICChevronUp from "assets/svg/chevron-up.svg";
 import IconCopy from "assets/svg/copy.svg";
 import IconDisconnect from "assets/svg/disconnect.svg";
+import { accAddressState, accIsLoggedInState } from "atoms/dappState";
 import { walletIsOpenConnectModalState } from "atoms/walletState";
 import Avatar from "components/Avatar";
 import BaseModal from "components/BaseModal";
@@ -20,10 +17,10 @@ import {
     SetStateAction,
     useCallback,
     useEffect,
-    useState
+    useState,
 } from "react";
 import { Modifier } from "react-popper";
-import { useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import WalletBalance from "./WalletBalance";
 const overlayModifier: Partial<Modifier<unknown, object>> = {
     name: "overlay",
@@ -55,15 +52,17 @@ type AddressMenuProp = {
 };
 
 function AddressMenu({ infoLayout, dropdownBtn, connectBtn }: AddressMenuProp) {
-    const { isLoggedIn: loggedIn } = useGetLoginInfo();
-    const { address } = useGetAccountInfo();
+    const loggedIn = useRecoilValue(accIsLoggedInState);
+    const address = useRecoilValue(accAddressState);
     const logoutDapp = logout;
     const [mShowMenu, setMShowMenu] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const mounted = useMounted();
     const { isMobile } = useScreenSize();
     const connectWallet = useConnectWallet();
-    const setIsOpenConnectWalletModal = useSetRecoilState(walletIsOpenConnectModalState);
+    const setIsOpenConnectWalletModal = useSetRecoilState(
+        walletIsOpenConnectModalState
+    );
     useEffect(() => {
         setMShowMenu(false);
         setShowMenu(false);
@@ -109,7 +108,11 @@ function AddressMenu({ infoLayout, dropdownBtn, connectBtn }: AddressMenuProp) {
                                         }
                                     >
                                         <div className="flex items-center mr-2.5">
-                                            <Avatar src={ImgAvatar} alt="avatar" className="w-6 h-6"/>
+                                            <Avatar
+                                                src={ImgAvatar}
+                                                alt="avatar"
+                                                className="w-6 h-6"
+                                            />
                                             <span className="ml-2.5">
                                                 {address.slice(0, 8) +
                                                     "..." +
