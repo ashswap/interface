@@ -244,16 +244,20 @@ const Swap = () => {
 
         const poolContract = new PoolContract(pool.address);
         Promise.all([
-            poolContract.getAmountOut(
-                token1.id,
-                token2.id,
-                new BigNumber(10).exponentiatedBy(token1.decimals)
-            ),
-            poolContract.getAmountOut(
-                token2.id,
-                token1.id,
-                new BigNumber(10).exponentiatedBy(token2.decimals)
-            ),
+            poolContract
+                .getAmountOut(
+                    token1.id,
+                    token2.id,
+                    new BigNumber(10).exponentiatedBy(token1.decimals)
+                )
+                .then((val) => val.amount_out),
+            poolContract
+                .getAmountOut(
+                    token2.id,
+                    token1.id,
+                    new BigNumber(10).exponentiatedBy(token2.decimals)
+                )
+                .then((val) => val.amount_out),
             queryPoolContract.getFeePct(pool),
         ]).then(([rate1, rate2, fee]) => {
             setRates([rate1, rate2]);

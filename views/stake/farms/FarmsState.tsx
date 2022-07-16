@@ -153,8 +153,8 @@ const FarmsState = () => {
     );
 
     const getTotalLPLocked = useCallback(async (farm: IFarm) => {
-        const proxyProvider = getProxyNetworkProvider();
-        const res = await proxyProvider.getFungibleTokenOfAccount(
+        const apiProvider = getApiNetworkProvider();
+        const res = await apiProvider.getFungibleTokenOfAccount(
             new Address(farm.farm_address),
             farm.farming_token_id
         );

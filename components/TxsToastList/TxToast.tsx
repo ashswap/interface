@@ -9,7 +9,6 @@ import {
 } from "react";
 
 import {
-    useGetNetworkConfig,
     useGetSignedTransactions,
     useGetTransactionDisplayInfo,
 } from "@elrondnetwork/dapp-core/hooks";
@@ -33,7 +32,9 @@ import IClose from "assets/svg/close.svg";
 import ICCopy from "assets/svg/copy.svg";
 import ICHourGlass from "assets/svg/hourglass.svg";
 import ICNewTabRound from "assets/svg/new-tab-round.svg";
+import { networkConfigState } from "atoms/dappState";
 import CopyBtn from "components/CopyBtn";
+import { useRecoilValue } from "recoil";
 const averageTxDurationMs = 6000;
 const crossShardRounds = 5;
 interface TransactionToastPropsType {
@@ -76,7 +77,8 @@ const TxRecord = ({
     collapse?: boolean;
 }) => {
     const { hash, status } = tx;
-    const network: AccountInfoSliceNetworkType = useGetNetworkConfig().network;
+    const network: AccountInfoSliceNetworkType =
+        useRecoilValue(networkConfigState).network;
     const iconEl = useMemo(() => {
         return StatusIconMap[status];
     }, [status]);
@@ -125,7 +127,6 @@ export const TxToast = ({
     const ref = useRef(null);
     const [shouldRender, setShouldRender] = useState(true);
     const transactionDisplayInfo = useGetTransactionDisplayInfo(toastId);
-    const network: AccountInfoSliceNetworkType = useGetNetworkConfig().network;
     const { signedTransactions } = useGetSignedTransactions();
 
     // const accountShard = useGetAccountShard();

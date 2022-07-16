@@ -1,7 +1,13 @@
 import React from "react";
 import ImgMetalCardBg from "assets/images/metal-card-bg.png";
 
-function MetalCard({ children, gemImg }: {children: any, gemImg: StaticImageData}) {
+function MetalCard({
+    children,
+    gemImg,
+}: {
+    children: any;
+    gemImg: StaticImageData;
+}) {
     return (
         <div
             className="clip-corner-tr-[0.875rem] clip-corner-bevel relative mx-auto p-[1px] w-full"

@@ -1,5 +1,5 @@
-import { getIsLoggedIn } from "@elrondnetwork/dapp-core/utils";
-import { accIsLoggedInState } from "atoms/dappState";
+import { useSelector } from "@elrondnetwork/dapp-core/reduxStore/DappProviderContext";
+import { dappCoreState } from "atoms/dappState";
 import { walletLPMapState, walletTokenPriceState } from "atoms/walletState";
 import { ASHSWAP_CONFIG } from "const/ashswapConfig";
 import { blockTimeMs } from "const/dappConfig";
@@ -16,13 +16,13 @@ import useSWR from "swr";
 import useInterval from "./useInterval";
 
 export function useRecoilAdapter() {
-    // start copy from dappContext
-    const isLoggin = getIsLoggedIn();
+    // copy whole dappContext to recoil
+    const store = useSelector((state) => state);
     const apiProvider = getApiNetworkProvider();
     // end
 
     // recoil
-    const setIsLoggin = useSetRecoilState(accIsLoggedInState);
+    const setDappState = useSetRecoilState(dappCoreState);
     const setTokenPrices = useSetRecoilState(walletTokenPriceState);
     const setLpTokens = useSetRecoilState(walletLPMapState);
     // end recoil
@@ -32,8 +32,8 @@ export function useRecoilAdapter() {
     // connect recoil state to dapp-core
 
     useEffect(() => {
-        setIsLoggin(isLoggin);
-    }, [isLoggin, setIsLoggin]);
+        setDappState(store as any);
+    }, [setDappState, store]);
 
     const { data: priceEntries } = useSWR<number[]>(
         TOKENS.map((token) =>

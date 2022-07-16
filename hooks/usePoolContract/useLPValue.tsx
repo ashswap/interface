@@ -13,8 +13,10 @@ const useLPValue = () => {
                     walletTokenPriceState
                 );
                 const poolContract = new PoolContract(pool.address);
-                const { value0, value1 } =
-                    await poolContract.getRemoveLiquidityTokens(ownLiquidity);
+                const {
+                    first_token_amount: value0,
+                    second_token_amount: value1,
+                } = await poolContract.getRemoveLiquidityTokens(ownLiquidity);
                 let token0 = pool.tokens[0];
                 let token1 = pool.tokens[1];
 

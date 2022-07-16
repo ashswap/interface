@@ -32,7 +32,12 @@ import useInterval from "hooks/useInterval";
 import useLPValue from "hooks/usePoolContract/useLPValue";
 import moment from "moment";
 import { useCallback, useEffect } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import {
+    useRecoilCallback,
+    useRecoilState,
+    useRecoilValue,
+    useSetRecoilState,
+} from "recoil";
 
 const GovState = () => {
     const loggedIn = useRecoilValue(accIsLoggedInState);
@@ -73,104 +78,160 @@ const GovState = () => {
         setRewardValue,
     ]);
 
-    const getVEASHAmt = useCallback(() => {
-        if (!loggedIn || !lockedAmt || lockedAmt.eq(0)) return;
-        const ts = moment().unix();
-        proxy
-            .queryContract(
-                new Query({
-                    address: new Address(
-                        ASHSWAP_CONFIG.dappContract.voteEscrowedContract
-                    ),
-                    func: new ContractFunction("balanceOfAtTs"),
-                    args: [
-                        new AddressValue(new Address(address)),
-                        new BigUIntValue(new BigNumber(ts)),
-                    ],
-                })
-            )
-            .then(({ returnData }) => {
-                const values = queryContractParser(returnData[0], "BigUint");
-                setVEASH(values[0]?.valueOf() || new BigNumber(0));
-            });
-    }, [loggedIn, address, lockedAmt, proxy, setVEASH]);
+    const getVEASHAmt = useRecoilCallback(
+        ({ snapshot, set }) =>
+            async () => {
+                const loggedIn = await snapshot.getPromise(accIsLoggedInState);
+                const address = await snapshot.getPromise(accAddressState);
+                const lockedAmt = await snapshot.getPromise(govLockedAmtState);
+                if (!loggedIn || !lockedAmt || lockedAmt.eq(0)) return;
+                const ts = moment().unix();
+                getProxyNetworkProvider()
+                    .queryContract(
+                        new Query({
+                            address: new Address(
+                                ASHSWAP_CONFIG.dappContract.voteEscrowedContract
+                            ),
+                            func: new ContractFunction("balanceOfAtTs"),
+                            args: [
+                                new AddressValue(new Address(address)),
+                                new BigUIntValue(new BigNumber(ts)),
+                            ],
+                        })
+                    )
+                    .then(({ returnData }) => {
+                        const values = queryContractParser(
+                            returnData[0],
+                            "BigUint"
+                        );
+                        set(
+                            govVeASHAmtState,
+                            values[0]?.valueOf() || new BigNumber(0)
+                        );
+                    });
+            },
+        []
+    );
 
-    const getLockedAmt = useCallback(() => {
-        if (!loggedIn) return;
-        proxy
-            .queryContract(
-                new Query({
-                    address: new Address(
-                        ASHSWAP_CONFIG.dappContract.voteEscrowedContract
-                    ),
-                    func: new ContractFunction("getLocked"),
-                    args: [new AddressValue(new Address(address))],
-                })
-            )
-            .then(({ returnData }) => {
-                const values = queryContractParser(
-                    returnData[0],
-                    "tuple2<BigUint,U64>"
-                );
-                setLockedAmt(values[0]?.valueOf().field0 || new BigNumber(0));
-                setUnlockTS(values[0]?.valueOf().field1 || new BigNumber(0));
-            });
-    }, [loggedIn, proxy, address, setLockedAmt, setUnlockTS]);
+    const getLockedAmt = useRecoilCallback(
+        ({ snapshot, set }) =>
+            async () => {
+                const loggedIn = await snapshot.getPromise(accIsLoggedInState);
+                const address = await snapshot.getPromise(accAddressState);
 
-    const getTotalSupplyVeASH = useCallback(() => {
-        const ts = moment().unix();
-        proxy
-            .queryContract(
-                new Query({
-                    address: new Address(
-                        ASHSWAP_CONFIG.dappContract.voteEscrowedContract
-                    ),
-                    func: new ContractFunction("totalSupplyAtTs"),
-                    args: [new BigUIntValue(new BigNumber(ts))],
-                })
-            )
-            .then(({ returnData }) => {
-                const values = queryContractParser(returnData[0], "BigUint");
-                setTotalSupplyVeASH(values[0]?.valueOf() || new BigNumber(0));
-            });
-    }, [proxy, setTotalSupplyVeASH]);
+                if (!loggedIn) return;
+                console.log("query");
+                getProxyNetworkProvider()
+                    .queryContract(
+                        new Query({
+                            address: new Address(
+                                ASHSWAP_CONFIG.dappContract.voteEscrowedContract
+                            ),
+                            func: new ContractFunction("getLocked"),
+                            args: [new AddressValue(new Address(address))],
+                        })
+                    )
+                    .then(({ returnData }) => {
+                        const values = queryContractParser(
+                            returnData[0],
+                            "tuple2<BigUint,U64>"
+                        );
+                        set(
+                            govLockedAmtState,
+                            values[0]?.valueOf().field0 || new BigNumber(0)
+                        );
+                        set(
+                            govUnlockTSState,
+                            values[0]?.valueOf().field1 || new BigNumber(0)
+                        );
+                    });
+            },
+        []
+    );
 
-    const getRewardAmt = useCallback(() => {
-        if (!loggedIn) return;
-        proxy
-            .queryContract(
-                new Query({
-                    address: new Address(
-                        ASHSWAP_CONFIG.dappContract.feeDistributor
-                    ),
-                    func: new ContractFunction("getClaimableAmount"),
-                    args: [new AddressValue(new Address(address))],
-                })
-            )
-            .then(({ returnData }) => {
-                const values = queryContractParser(
-                    returnData[returnData.length - 1],
-                    "BigUint"
-                );
-                setRewardLPAmt(values[0]?.valueOf() || new BigNumber(0));
-            });
-    }, [loggedIn, proxy, address, setRewardLPAmt]);
+    const getTotalSupplyVeASH = useRecoilCallback(
+        ({ snapshot, set }) =>
+            async () => {
+                const ts = moment().unix();
+                getProxyNetworkProvider()
+                    .queryContract(
+                        new Query({
+                            address: new Address(
+                                ASHSWAP_CONFIG.dappContract.voteEscrowedContract
+                            ),
+                            func: new ContractFunction("totalSupplyAtTs"),
+                            args: [new BigUIntValue(new BigNumber(ts))],
+                        })
+                    )
+                    .then(({ returnData }) => {
+                        const values = queryContractParser(
+                            returnData[0],
+                            "BigUint"
+                        );
+                        set(
+                            govTotalSupplyVeASH,
+                            values[0]?.valueOf() || new BigNumber(0)
+                        );
+                    });
+            },
+        []
+    );
 
-    const getTotalLockedAmt = useCallback(() => {
-        proxy
-            .queryContract(
-                new Query({
-                    address: new Address(
-                        ASHSWAP_CONFIG.dappContract.voteEscrowedContract
-                    ),
-                    func: new ContractFunction("totalLock"),
-                })
-            )
-            .then(({ returnData }) => {
-                const values = queryContractParser(returnData[0], "BigUint");
-                setTotalLockedAmt(values[0]?.valueOf() || new BigNumber(0));
-            });
-    }, [proxy, setTotalLockedAmt]);
+    const getRewardAmt = useRecoilCallback(
+        ({ snapshot, set }) =>
+            async () => {
+                const loggedIn = await snapshot.getPromise(accIsLoggedInState);
+                const address = await snapshot.getPromise(accAddressState);
+                if (!loggedIn) return;
+                getProxyNetworkProvider()
+                    .queryContract(
+                        new Query({
+                            address: new Address(
+                                ASHSWAP_CONFIG.dappContract.feeDistributor
+                            ),
+                            func: new ContractFunction("getClaimableAmount"),
+                            args: [new AddressValue(new Address(address))],
+                        })
+                    )
+                    .then(({ returnData }) => {
+                        const values = queryContractParser(
+                            returnData[returnData.length - 1],
+                            "BigUint"
+                        );
+                        set(
+                            govRewardLPAmtState,
+                            values[0]?.valueOf() || new BigNumber(0)
+                        );
+                    });
+            },
+        []
+    );
+
+    const getTotalLockedAmt = useRecoilCallback(
+        ({ set }) =>
+            async () => {
+                getProxyNetworkProvider()
+                    .queryContract(
+                        new Query({
+                            address: new Address(
+                                ASHSWAP_CONFIG.dappContract.voteEscrowedContract
+                            ),
+                            func: new ContractFunction("totalLock"),
+                        })
+                    )
+                    .then(({ returnData }) => {
+                        const values = queryContractParser(
+                            returnData[0],
+                            "BigUint"
+                        );
+                        set(
+                            govTotalLockedAmtState,
+                            values[0]?.valueOf() || new BigNumber(0)
+                        );
+                    });
+            },
+        []
+    );
 
     const getRewardLPID = useCallback(() => {
         proxy
@@ -206,20 +267,28 @@ const GovState = () => {
     }, [rewardLPAmt, rewardLPToken, getLPValue, setRewardValue]);
 
     const getASHTotalSupply = useCallback(() => {
-        return apiProvider
+        return getApiNetworkProvider()
             .getDefinitionOfFungibleToken(ASH_TOKEN.id)
             .then(({ supply }) => {
                 return toWei(ASH_TOKEN, supply.toString(10) || "0");
             });
-    }, [apiProvider]);
+    }, []);
 
-    const getTotalLockedASHPct = useCallback(async () => {
-        const totalSupply = await getASHTotalSupply();
-        if (totalSupply.eq(0)) setTotalLockedPct(0);
-        return setTotalLockedPct(
-            totalLockedAmt.multipliedBy(100).div(totalSupply).toNumber()
-        );
-    }, [getASHTotalSupply, totalLockedAmt, setTotalLockedPct]);
+    const getTotalLockedASHPct = useRecoilCallback(
+        ({ snapshot, set }) =>
+            async () => {
+                const totalLockedAmt = await snapshot.getPromise(
+                    govTotalLockedAmtState
+                );
+                const totalSupply = await getASHTotalSupply();
+                if (totalSupply.eq(0)) set(govTotalLockedPctState, 0);
+                return set(
+                    govTotalLockedPctState,
+                    totalLockedAmt.multipliedBy(100).div(totalSupply).toNumber()
+                );
+            },
+        [getASHTotalSupply]
+    );
 
     useEffect(() => {
         getRewardValue();

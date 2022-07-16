@@ -1,10 +1,10 @@
-import { useGetNetworkConfig } from "@elrondnetwork/dapp-core/hooks";
 import { AccountInfoSliceNetworkType } from "@elrondnetwork/dapp-core/types";
 import ICArrowRight from "assets/svg/arrow-right.svg";
 import ICCopy from "assets/svg/copy.svg";
 import ICNewTabRound from "assets/svg/new-tab-round.svg";
 import ICPlus from "assets/svg/plus.svg";
 import ICSwap from "assets/svg/swap.svg";
+import { networkConfigState } from "atoms/dappState";
 import Avatar from "components/Avatar";
 import CopyBtn from "components/CopyBtn";
 import InfoLayout from "components/Layout/Info";
@@ -17,6 +17,7 @@ import { TxStatsRecord } from "interface/txStats";
 import { GetServerSideProps } from "next";
 import Link from "next/link";
 import { ReactElement, useMemo } from "react";
+import { useRecoilValue } from "recoil";
 import useSWR from "swr";
 import TxsTable from "views/info/components/TxsTable";
 import PoolChart from "views/info/Pools/[address]/PoolChart";
@@ -59,7 +60,8 @@ function PoolDetailPage({ pool }: Props) {
         { refreshInterval: 5 * 60 * 1000 }
     );
     const [token1, token2] = useMemo(() => pool.tokens, [pool]);
-    const network: AccountInfoSliceNetworkType = useGetNetworkConfig().network;
+    const network: AccountInfoSliceNetworkType =
+        useRecoilValue(networkConfigState).network;
     return (
         <div className="text-white py-7 max-w-6xl mx-auto px-6 sm:px-0">
             <ul className="flex space-x-1 text-xs mb-6">

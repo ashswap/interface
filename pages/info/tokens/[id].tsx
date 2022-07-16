@@ -1,10 +1,10 @@
-import { useGetNetworkConfig } from "@elrondnetwork/dapp-core/hooks";
 import { AccountInfoSliceNetworkType } from "@elrondnetwork/dapp-core/types";
 import { Tooltip } from "antd";
 import ICArrowRight from "assets/svg/arrow-right.svg";
 import ICCopy from "assets/svg/copy.svg";
 import ICNewTabRound from "assets/svg/new-tab-round.svg";
 import ICSwap from "assets/svg/swap.svg";
+import { networkConfigState } from "atoms/dappState";
 import Avatar from "components/Avatar";
 import InfoLayout from "components/Layout/Info";
 import { ASHSWAP_CONFIG } from "const/ashswapConfig";
@@ -17,6 +17,7 @@ import { TxStatsRecord } from "interface/txStats";
 import { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
 import { ReactElement } from "react";
+import { useRecoilValue } from "recoil";
 import useSWR from "swr";
 import PoolsTable from "views/info/components/PoolsTable";
 import TxsTable from "views/info/components/TxsTable";
@@ -58,7 +59,8 @@ const TokenDetailPage: Page<props> = ({ token }: props) => {
         fetcher,
         { refreshInterval: 5 * 60 * 1000 }
     );
-    const network: AccountInfoSliceNetworkType = useGetNetworkConfig().network;
+    const network: AccountInfoSliceNetworkType =
+        useRecoilValue(networkConfigState).network;
     return (
         <div>
             <div className="text-white py-7 max-w-6xl mx-auto px-6 sm:px-0">

@@ -1,4 +1,3 @@
-
 import {
     AbiRegistry,
     Address,
@@ -21,7 +20,7 @@ const getAmountOutMaiarPool = async (
     poolAddress: string,
     tokenFromId: string,
     amountIn: BigNumber
-) => {
+): Promise<BigNumber> => {
     const proxy = getProxyNetworkProvider();
     try {
         const { returnData } = await proxy.queryContract(
@@ -51,7 +50,9 @@ const calculateAmountOut = async (
     if (pool.isMaiarPool) {
         return await getAmountOutMaiarPool(pool.address, tokenFromId, amountIn);
     }
-    return await new PoolContract(pool.address).getAmountOut(tokenFromId, tokenToId, amountIn);
+    return await new PoolContract(pool.address)
+        .getAmountOut(tokenFromId, tokenToId, amountIn)
+        .then((val) => val.amount_out);
 };
 
 const getReserveMaiarPool = async (pool: IPool) => {
@@ -103,8 +104,6 @@ const getFeePct = async (pool: IPool) => {
     return new BigNumber(0);
 };
 
-
-
 export const queryPoolContract = {
     getAmountOutMaiarPool,
     calculateAmountOut,
@@ -140,41 +139,46 @@ class PoolContract extends Contract {
         tokenFromId: string,
         tokenToId: string,
         amountIn: BigNumber
-    ) {
+    ): Promise<{
+        admin_fee: BigNumber;
+        amount_out: BigNumber;
+        token_in_balance: BigNumber;
+        token_out_balance: BigNumber;
+        total_fee: BigNumber;
+    }> {
         const interaction = this.contract.methods.getAmountOut([
             tokenFromId,
             tokenToId,
             amountIn,
         ]);
         const query = interaction.check().buildQuery();
-        try {
-            const res = await this.getProxy().queryContract(query);
-            const { firstValue } = this.resultParser.parseQueryResponse(
-                res,
-                interaction.getEndpoint()
-            );
-            return (firstValue?.valueOf() as BigNumber) || new BigNumber(0);
-        } catch (error) {
-            console.error(error);
-            return new BigNumber(0);
-        }
+        const res = await this.getProxy().queryContract(query);
+        const { firstValue } = this.resultParser.parseQueryResponse(
+            res,
+            interaction.getEndpoint()
+        );
+        return firstValue?.valueOf() as any;
     }
 
-   async getRemoveLiquidityTokens(lp: BigNumber)  {
-        const interaction = this.contract.methods.getRemoveLiquidityTokens([lp, new BigNumber(0), new BigNumber(0)]);
+    async getRemoveLiquidityTokens(lp: BigNumber): Promise<{
+        first_token_amount: BigNumber;
+        second_token_amount: BigNumber;
+        first_token_balance: BigNumber;
+        second_token_balance: BigNumber;
+    }> {
+        const interaction = this.contract.methods.getRemoveLiquidityTokens([
+            lp,
+            new BigNumber(0),
+            new BigNumber(0),
+        ]);
         const query = interaction.check().buildQuery();
-        try {
-            const res = await this.getProxy().queryContract(query);
-            const {firstValue} = this.resultParser.parseQueryResponse(res, interaction.getEndpoint());
-            return firstValue?.valueOf()
-        } catch (error) {
-            console.error(error);
-            // return {
-            //     value0: new BigNumber(values[0].valueOf().field0.toString()),
-            //     value1: new BigNumber(values[0].valueOf().field1.toString()),
-            // };
-        }
-   }
+        const res = await this.getProxy().queryContract(query);
+        const { firstValue } = this.resultParser.parseQueryResponse(
+            res,
+            interaction.getEndpoint()
+        );
+        return firstValue?.valueOf();
+    }
 }
 
 export default PoolContract;

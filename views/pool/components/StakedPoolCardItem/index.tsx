@@ -1,9 +1,9 @@
-import { useGetNetworkConfig } from "@elrondnetwork/dapp-core/hooks";
 import { AccountInfoSliceNetworkType } from "@elrondnetwork/dapp-core/types";
 import ICChevronDown from "assets/svg/chevron-down.svg";
 import ICChevronUp from "assets/svg/chevron-up.svg";
 import ICMinus from "assets/svg/minus.svg";
 import ICPlus from "assets/svg/plus.svg";
+import { networkConfigState } from "atoms/dappState";
 import { PoolsState } from "atoms/poolsState";
 import AddLiquidityModal from "components/AddLiquidityModal";
 import Avatar from "components/Avatar";
@@ -14,6 +14,7 @@ import { toEGLDD } from "helper/balance";
 import { formatAmount } from "helper/number";
 import { Unarray } from "interface/utilities";
 import { useState } from "react";
+import { useRecoilValue } from "recoil";
 
 function StakedPoolCardItem({
     poolData,
@@ -25,7 +26,8 @@ function StakedPoolCardItem({
     const [openAddLiquidity, setOpenAddLiquidity] = useState<boolean>(false);
     const [openRemoveLiquidity, setOpenRemoveLiquidity] =
         useState<boolean>(false);
-    const network: AccountInfoSliceNetworkType = useGetNetworkConfig().network;
+    const network: AccountInfoSliceNetworkType =
+        useRecoilValue(networkConfigState).network;
 
     if (!liquidityData) return null;
     const {

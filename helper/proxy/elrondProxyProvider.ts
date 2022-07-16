@@ -45,9 +45,13 @@ export default class ElrondProxyProvider {
             creator?: string;
             withSupply?: boolean;
         }
-    ): Promise<T extends "MetaESDT" ? IMetaESDT[] : Array<IMetaESDT | NFTOfAccountResponse>> {
+    ): Promise<
+        T extends "MetaESDT"
+            ? IMetaESDT[]
+            : Array<IMetaESDT | NFTOfAccountResponse>
+    > {
         const res: NFTOfAccountResponse[] = await this.apiProvider.doGetGeneric(
-            `/accounts/${address}/nfts${buildUrlParams(query)}`
+            `accounts/${address}/nfts${buildUrlParams(query)}`
         );
         const list = res.map((r) => {
             if (isMetaESDTResponse(r)) {
@@ -65,6 +69,5 @@ export default class ElrondProxyProvider {
             }
         });
         return list as any;
-
     }
 }

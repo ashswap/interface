@@ -16,7 +16,7 @@ import Image from "next/image";
 import platform from "platform";
 import QRCode from "qrcode";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 const MAIAR_WALLET_LINK = {
     PLAY_STORE: "https://maiar.onelink.me/HLcx/52dcde54",
@@ -27,7 +27,7 @@ const MAIAR_WALLET_LINK = {
 };
 
 function ConnectWalletModal() {
-    const loggedIn = useRecoilState(accIsLoggedInState);
+    const loggedIn = useRecoilValue(accIsLoggedInState);
     const [isOpenConnectWalletModal, setIsOpenConnectWalletModal] =
         useRecoilState(walletIsOpenConnectModalState);
 

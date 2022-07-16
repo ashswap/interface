@@ -1,8 +1,8 @@
-import { useGetNetworkConfig } from "@elrondnetwork/dapp-core/hooks";
 import { AccountInfoSliceNetworkType } from "@elrondnetwork/dapp-core/types";
 import ICArrowLeft from "assets/svg/arrow-left.svg";
 import ICArrowRight from "assets/svg/arrow-right.svg";
 import ICChevronDown from "assets/svg/chevron-down.svg";
+import { networkConfigState } from "atoms/dappState";
 import BasePopover from "components/BasePopover";
 import { TOKENS_MAP } from "const/tokens";
 import { toEGLDD } from "helper/balance";
@@ -10,7 +10,8 @@ import { formatAmount } from "helper/number";
 import { useScreenSize } from "hooks/useScreenSize";
 import { TxStatsRecord } from "interface/txStats";
 import moment from "moment";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRecoilValue } from "recoil";
 
 const actionLabelMap: Record<
     TxStatsRecord["name"],
@@ -29,7 +30,8 @@ const TxRecord = ({ txStats }: { txStats: TxStatsRecord }) => {
     const token2 = TOKENS_MAP[tokenId2];
     const label = actionLabelMap[txStats.name];
     const [time, setTime] = useState("");
-    const network: AccountInfoSliceNetworkType = useGetNetworkConfig().network;
+    const network: AccountInfoSliceNetworkType =
+        useRecoilValue(networkConfigState).network;
     useEffect(() => {
         const ts = moment.unix(txStats.timestamp);
         const func = () => {
